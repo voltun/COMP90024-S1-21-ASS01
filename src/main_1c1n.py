@@ -1,13 +1,11 @@
 import json
 import os
+from afinn_reader import AfinnReader
 
 def main():
-    #
-    afinn_f = open(os.path.join(os.path.dirname(__file__), "AFINN.txt"))
-    afinn = afinn_f.read()
+    #Init classes
+    afinn = AfinnReader(os.path.join(os.path.dirname(__file__), "AFINN.txt"))
 
-
-    print(afinn)
 
 
 if __name__ == "__main__":
