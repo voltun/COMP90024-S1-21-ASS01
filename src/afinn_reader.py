@@ -9,15 +9,19 @@ class AfinnReader(object):
             #Converts AFINN words and associated scores into list of lists
             # [..,["word", score],..]
             for line in f:
-                afinn_scorelist.append(line.split())
-
+                self.afinn_scorelist.append(line.split())
 
 
     #Takes a list of words and find exact word matches in AFINN.txt, then
     #returns the score of that string.
-    def calcAFINNScore(sentence):
-        #Use regex and loop through the entire list of input words with the
-        #AFINN words
-        for afinn in afinn_scorelist:
+    def calcAFINNScore(self, sentence):
+        score = 0
+        #Use regex matching and loop through the entire list of input words
+        # with the AFINN words
+        for afinn in self.afinn_scorelist:
             for word in sentence:
-                if (re.match(r"^("+afinn+")\.\?\!\'\"", re.I))
+                if (re.match(r"^("+afinn[0]+")(\.|\?|\!|\'|\"|)*$", word,
+                    re.IGNORECASE)):
+                    score += int(afinn[1])
+
+        return score
