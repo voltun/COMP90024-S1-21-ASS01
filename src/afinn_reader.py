@@ -9,7 +9,9 @@ class AfinnReader(object):
             #Converts AFINN words and associated scores into list of lists
             # [..,["word", score],..]
             for line in f:
-                self.afinn_scorelist.append(line.split())
+                split_line = line.split()
+                self.afinn_scorelist.append(["".join(split_line[:-1]),\
+                    split_line[-1]])
 
 
     #Takes a list of words and find exact word matches in AFINN.txt, then

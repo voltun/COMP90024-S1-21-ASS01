@@ -18,8 +18,8 @@ def main():
     afinn = AfinnReader(os.path.join(parent_dir, AFINNFILENAME))
     grid = GridParser(MELBGRIDFILENAME)
 
-    print(afinn.calcAFINNScore(["abanDoNs", "abandons.!?", "abandon abandon"]))
-    print(grid.getCell(144.85,-37.64))
+    # print(afinn.calcAFINNScore(["abanDoNs", "abandons.!?", "abandon abandon"]))
+    # print(grid.getCell(144.85,-37.64))
     #Start looping through all the tweet entries
     with open(twitter_fp, encoding="utf8") as json_file:
         for line in json_file:
@@ -55,14 +55,16 @@ def main():
             #Calculate the AFINN score of the tweet
             tweet_score = afinn.calcAFINNScore(tweet)
 
-            #Aggregate the score to the appropriate dictionary
+            #Aggregate the score to the appropriate dictionary with grid as
+            #the key
             if tweet_grid in score_dict.keys():
                 temp = score_dict[tweet_grid]
                 score_dict[tweet_grid] = [temp[0] + 1, temp[1] + tweet_score]
             else:
                 score_dict[tweet_grid] = []
                 score_dict[tweet_grid] = [1, tweet_score]
-                
+
+    print(score_dict)
 
 if __name__ == "__main__":
     main()
