@@ -1,6 +1,10 @@
 import json
+import os
+parent_dir = os.path.dirname(os.path.dirname(__file__))
 
-with open('melbGrid.json',encoding="utf8") as json_file:
+os.path.join(parent_dir, 'melbGrid.json')
+
+with open(os.path.join(parent_dir, 'melbGrid.json'),encoding="utf8") as json_file:
     data_list = json.load(json_file)
 
 grid = []
@@ -19,9 +23,13 @@ def getCell(lat,long):
     for i in range(len(grid)):
         if lat > grid[i][1] and lat < grid[i][2] and long > grid[i][3] and long < grid[i][4]:
             return grid[i][0]
-        if long == grid[i][3] and lat >= grid[i][1] and lat <= grid[i][2]:
+        if long == grid[i][4] and lat >= grid[i][1] and lat <= grid[i][2]:
             return grid[i][0]
+    for i in range(len(grid)):
         if lat == grid[i][2] and long >= grid[i][3] and long <= grid[i][4]:
             return grid[i][0]
+        if lat >= grid[i][1] and lat <= grid[i][2] and long >= grid[i][3] and long <= grid[i][4]:
+            return grid[i][0]
 
-print(getCell(144.85,-37.7))
+
+print(getCell(144.85,-37.64))
