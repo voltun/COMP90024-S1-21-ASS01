@@ -1,7 +1,7 @@
 import json
 import os
 
-line_count = 0
+line_count = 1
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 #Init classes
