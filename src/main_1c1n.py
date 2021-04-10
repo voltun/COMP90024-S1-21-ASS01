@@ -12,6 +12,7 @@ def main():
 
     #Init var
     line_count = 1
+    score_dict = {}
 
     #Init classes
     afinn = AfinnReader(os.path.join(parent_dir, AFINNFILENAME))
@@ -20,18 +21,48 @@ def main():
     print(afinn.calcAFINNScore(["abanDoNs", "abandons.!?", "abandon abandon"]))
     print(grid.getCell(144.85,-37.64))
     #Start looping through all the tweet entries
-    with open(twitter_fp,encoding="utf8") as json_file:
+    with open(twitter_fp, encoding="utf8") as json_file:
         for line in json_file:
+            #Init total number of rows in dataset for tracking
             if line_count == 1:
                 total_rows = int(line.split(',')[0].split(':')[1])
                 print(total_rows)
-            elif line_count >= total_rows:
+                line_count += 1
+                continue
+
+            #Encode the final row of the dataset by omitting ]}
+            if line_count >= total_rows:
                 json_line = json.loads(line[:-3])
                 print(json_line)
+            #Encode the rest of the rows by only omitting ,
             else:
                 json_line = json.loads(line[:-2])
                 print(json_line)
             line_count += 1
+
+            #Process the tweet
+            tweet = []
+            location = []
+
+            tweet = json_line["value"]["properties"]["text"].split()
+            location = json_line["value"]["geometry"]["coordinates"]
+            tweet_grid = grid.getCell(location[0], location[1])
+
+            #If the tweet is not from Melbourne, do not continue processing
+            if tweet_grid is None:
+                continue
+
+            #Calculate the AFINN score of the tweet
+            tweet_score = afinn.calcAFINNScore(tweet)
+
+            #Aggregate the score to the appropriate dictionary
+            if tweet_grid in score_dict.keys():
+                temp = score_dict[tweet_grid]
+                score_dict[tweet_grid] = [temp[0] + 1, temp[1] + tweet_score]
+            else:
+                score_dict[tweet_grid] = []
+                score_dict[tweet_grid] = [1, tweet_score]
+                
 
 if __name__ == "__main__":
     main()
