@@ -41,10 +41,10 @@ def main():
             line_count += 1
 
             #Process the tweet
-            tweet = []
+            tweet = ""
             location = []
 
-            tweet = json_line["value"]["properties"]["text"].split()
+            tweet = json_line["value"]["properties"]["text"]
             location = json_line["value"]["geometry"]["coordinates"]
             tweet_grid = grid.getCell(location[0], location[1])
 
@@ -64,7 +64,7 @@ def main():
                 score_dict[tweet_grid] = []
                 score_dict[tweet_grid] = [1, tweet_score]
 
-    print(score_dict)
+            print(score_dict)
 
 if __name__ == "__main__":
     main()

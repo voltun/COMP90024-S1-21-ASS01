@@ -14,16 +14,20 @@ class AfinnReader(object):
                     split_line[-1]])
 
 
-    #Takes a list of words and find exact word matches in AFINN.txt, then
-    #returns the score of that string.
+    #Takes a sentence as string and find all exact word matches in AFINN.txt as
+    #per the project specifications, then returns the score of that string.
     def calcAFINNScore(self, sentence):
         score = 0
         #Use regex matching and loop through the entire list of input words
         # with the AFINN words
         for afinn in self.afinn_scorelist:
-            for word in sentence:
-                if (re.match(r"^("+afinn[0]+")(\.|\?|\!|\'|\"|)*$", word,
-                    re.IGNORECASE)):
-                    score += int(afinn[1])
+            found_list = []
+            found_list = re.findall(r"((\s+|^)"+afinn[0]+ \
+            "(\s+|$))|((\s+|^)"+afinn[0]+"(\.|\,|\?|\!|\'|\")+)", sentence, \
+                re.IGNORECASE)
+                
+            #Increment total score by number of exact match occurences, if any
+            if (len(found_list) > 0):
+                score += int(afinn[1]) * len(found_list)
 
         return score
