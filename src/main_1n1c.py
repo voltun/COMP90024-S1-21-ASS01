@@ -1,8 +1,10 @@
 import json
 import os
 import time
+
 from afinn_reader import AfinnReader
 from grid_parser import GridParser
+from mpi4py import MPI
 
 MELBGRIDFILENAME = "melbGrid.json"
 AFINNFILENAME = "AFINN.txt"
@@ -13,8 +15,12 @@ def main():
     # twitter_fp = os.path.join(parent_dir, "tinyTwitter.json")
 
     #Init var
-    line_count = 1
+    scoreList = []
+    textList = []
     score_dict = {}
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank() # get your process ID
 
     #Init classes
     # afinn = AfinnReader(os.path.join(parent_dir, AFINNFILENAME))
@@ -26,55 +32,52 @@ def main():
 
     #Start timer
     start = time.time()
-    #Start looping through all the tweet entries
-    with open(TWITTERFILENAME, encoding="utf8") as json_file:
-        for line in json_file:
-            #Init total number of rows in dataset for tracking
-            if line_count == 1:
-                total_rows = int(line.split(',')[0].split(':')[1])
-                print("Total rows: " + str(total_rows))
-                line_count += 1
-                continue
+    #The master is the only process that reads the file
+    if rank == 0:
+        #Start looping through all the tweet entries
+        with open(TWITTERFILENAME,encoding="utf8") as json_file:
+            data_list = json.load(json_file)
 
-            #Encode the final row of the dataset by omitting ]}
-            if line_count >= total_rows:
-                json_line = json.loads(line[:-3])
-                # print(json_line)
-            #Encode the rest of the rows by only omitting ,
-            else:
-                json_line = json.loads(line[:-2])
-                # print(json_line)
-            line_count += 1
+        for data in data_list['rows']:
+            text = data["value"]["properties"]["text"]
+            location = data["value"]["geometry"]["coordinates"]
+            temp = [text,location]
+            textList.append(temp)
 
-            #Process the tweet
-            tweet = ""
-            location = []
+    # Divide the data among processes
+    textList = comm.scatter(textList, root=0)
 
-            tweet = json_line["value"]["properties"]["text"]
-            location = json_line["value"]["geometry"]["coordinates"]
-            tweet_grid = grid.getCell(location[0], location[1])
+    for item in textList:
+        tweet = item[0]
+        location = item[1]
+        tweet_grid = grid.getCell(location[0], location[1])
 
-            #If the tweet is not from Melbourne, do not continue processing
-            if tweet_grid is None:
-                continue
+        #If the tweet is not from Melbourne, do not continue processing
+        if tweet_grid is None:
+            continue
 
-            #Calculate the AFINN score of the tweet
-            tweet_score = afinn.calcAFINNScore(tweet)
+        #Calculate the AFINN score of the tweet
+        tweet_score = afinn.calcAFINNScore(tweet)
 
-            #Aggregate the score to the appropriate dictionary with grid as
-            #the key
-            if tweet_grid in score_dict.keys():
-                temp = score_dict[tweet_grid]
-                score_dict[tweet_grid] = [temp[0] + 1, temp[1] + tweet_score]
-            else:
-                score_dict[tweet_grid] = []
-                score_dict[tweet_grid] = [1, tweet_score]
+        #append results to scoreList
+        scoreList.append([tweet_grid, tweet_score])
 
-        #Stop the time elapsed
-        end = time.time()
+    # Send the results back to the master processes
+    results = comm.gather(scoreList,root=0)
 
-        print("Time elapsed: "+ str((end-start)))
-        print_score(score_dict)
+    #Aggregate the score to the appropriate dictionary with grid as the key
+    for tweet_grid, value in results:
+        if tweet_grid in score_dict.keys():
+            temp = score_dict[tweet_grid]
+            score_dict[tweet_grid] = [temp[0] + 1, temp[1] + tweet_score]
+        else:
+            score_dict[tweet_grid] = [1, tweet_score]
+
+    #Stop the time elapsed
+    end = time.time()
+
+    print("Time elapsed: "+ str((end-start)))
+    print_score(score_dict)
 
 #First formats the data then print out the data in an aligned table
 #Grid   #Total Tweets   $Overall Sentiment Score
@@ -92,7 +95,6 @@ def print_score(score_dict):
             score = "+"+str(val[1])
 
         print(grid.ljust(10)+format(val[0],",d").center(25)+score.center(25))
-
 
 
 if __name__ == "__main__":
