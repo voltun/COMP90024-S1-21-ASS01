@@ -21,6 +21,7 @@ def main(argv):
     line_count = 0
     bounds_list = []
     counter = 0
+    results = []
     score_dict = {}
     processList = []
     scoreList = []
@@ -37,7 +38,7 @@ def main(argv):
     if rank == 0:
         textList = []
         #Start looping through all the tweet entries
-        with open(filename,encoding="utf8") as json_file:
+        with open(filename,encoding="utf8") as json_count:
             # data_list = json.load(json_file)
 
         #Only store [tweet,(x-coord,y-coord)]
@@ -47,7 +48,7 @@ def main(argv):
         #     temp = [text,location]
         #     textList.append(temp)
 
-            for line in json_file:
+            for line in json_count:
                 #Init total number of rows in dataset for tracking
                 if total_rows == 0:
                     total_rows = int(line.split(',')[0].split(':')[1])
@@ -107,7 +108,7 @@ def main(argv):
                 continue
 
             #Traverse to part of file to start processing
-            while counter < low_bound:
+            if counter < low_bound:
                 counter += 1
                 continue
 
@@ -134,6 +135,7 @@ def main(argv):
             if len(line) <= 0:
                 break
 
+            counter += 1
             #Extract out only the tweet and coordinates from data
             text = json_line["value"]["properties"]["text"]
             location = json_line["value"]["geometry"]["coordinates"]
@@ -151,8 +153,7 @@ def main(argv):
             #append results to scoreList
             scoreList.append({tweet_grid: tweet_score})
 
-            counter += 1
-
+    print("Process %d dict: %s" % (rank, str(scoreList)))
     #Process the tweets
     # for item in dataList:
     #     tweet = item[0]

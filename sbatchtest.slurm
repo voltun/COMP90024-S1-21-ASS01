@@ -4,15 +4,11 @@
 #SBATCH --job-name=bigtest
 
 # How many CPU to run on
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=4
 
 # Minimum acceptable walltime=hr:min:sec
-#SBATCH -t 24:00:00
-
-# Specify email to be notified of progress
-#SBATCH --mail-user=chungw4@student.unimelb.edu.au
-#SBATCH --mail-type=ALL
+#SBATCH -t 00:15:00
 
 # Load environment variables for python
 module purge
@@ -21,4 +17,4 @@ module load foss/2019b
 module load python/3.7.4
 
 # Command to run the job!
-time srun -n 4 python3 script_test.py "tinyTwitter.json"
+time srun -n 8 python3 script_test.py "tinyTwitter.json"

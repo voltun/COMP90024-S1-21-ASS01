@@ -66,6 +66,7 @@ def main(argv):
         #append results to scoreList
         scoreList.append({tweet_grid: tweet_score})
 
+    print("Process %d dict: %s" % (rank, str(scoreList)))
     # Send the results back to the master process
     results = comm.gather(scoreList, root=0)
 

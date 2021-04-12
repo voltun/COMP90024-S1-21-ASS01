@@ -65,6 +65,7 @@ def main(argv):
     up_bound = indexList[1]
     header_flag = True
 
+    #Process tweets
     with open(filename, encoding="utf8") as json_file:
         for line in json_file:
             #Skip first line of file by default
@@ -73,7 +74,7 @@ def main(argv):
                 continue
 
             #Traverse to part of file to start processing
-            while counter < low_bound:
+            if counter < low_bound:
                 counter += 1
                 continue
 
@@ -100,6 +101,8 @@ def main(argv):
             if len(line) <= 0:
                 break
 
+            counter += 1
+
             #Extract out only the tweet and coordinates from data
             text = json_line["value"]["properties"]["text"]
             location = json_line["value"]["geometry"]["coordinates"]
@@ -116,8 +119,6 @@ def main(argv):
 
             #append results to scoreList
             scoreList.append({tweet_grid: tweet_score})
-
-            counter += 1
 
     # Send the results back to the master process
     results = comm.gather(scoreList, root=0)
