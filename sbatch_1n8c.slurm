@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Give the job a name
-#SBATCH --job-name=twitter1n8c
+#SBATCH --job-name=twitt1n8c
 
-# How many nodes and cores to run on
+# How many CPU to run on
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
 
 # Minimum acceptable walltime=hr:min:sec
-#SBATCH -t 1-12:00:00
+#SBATCH -t 2-00:00:00
 
 # Specify email to be notified of progress
 #SBATCH --mail-user=chungw4@student.unimelb.edu.au
@@ -20,5 +20,13 @@ module purge
 module load foss/2019b
 module load python/3.7.4
 
-# Command to run the job!
-python3 script.py "bigTwitter.json"
+echo "Running the script with 1 node 8 core"
+
+echo "Running with tinyTwitter.json"
+time srun -n 8 python3 script_final.py "tinyTwitter.json"
+
+echo "Running with smallTwitter.json"
+time srun -n 8 python3 script_final.py "smallTwitter.json"
+
+echo "Running with bigTwitter.json"
+time srun -n 8 python3 script_final.py "bigTwitter.json"

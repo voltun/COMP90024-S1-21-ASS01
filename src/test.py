@@ -1,23 +1,20 @@
+from grid_parser import GridParser
+import json
 
+GRID = "melbGrid.json"
+FILE = "smallTwitter.json"
 
-def print_score(score_dict):
-    #Print header
-    # print("%-25s%-25s%-25s" % ("Grid", "#Total Tweets", "#Overall Sentiment Score"))
-    # for grid in score_dict.keys():
-    #     val = score_dict[grid]
-    #     print("%-25s%-25s%-25s" % (grid, str(val[0]), str(val[1])))
-    print("Cell".ljust(10)+"#Total Tweets".center(25)+"#Overall Sentiment Score".center(25))
-    #Print data
-    for grid in score_dict.keys():
-        val = score_dict[grid]
-        #Formatting + and - signs for score, no signs for 0
-        if val[1] < 0:
-            score = "-"+str(val[1])
-        elif val[1] > 0:
-            score = "+"+str(val[1])
+grid = GridParser(GRID)
 
-        print(grid.ljust(10)+format(val[0],",d").center(25)+score.center(25))
+with open(FILE,encoding="utf8") as json_file:
+    data_list = json.load(json_file)
 
-
-
-print_score({"C2":[19000,33]})
+locationList = []
+count = 0
+for data in data_list['rows']:
+    # temp = data["value"]["geometry"]["coordinates"]
+    # words = data["value"]["properties"]["text"].split()
+    # textList.append(words)
+    # asd = grid.getCell(temp[0], temp[1])
+    count += 1
+print(count)

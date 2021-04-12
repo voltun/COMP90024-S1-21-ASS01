@@ -1,55 +1,56 @@
 import json
-import os
-import time
-
+import sys
+import numpy
+from mpi4py import MPI
 from afinn_reader import AfinnReader
 from grid_parser import GridParser
-from mpi4py import MPI
 
 MELBGRIDFILENAME = "melbGrid.json"
 AFINNFILENAME = "AFINN.txt"
-TWITTERFILENAME = "tinyTwitter.json"
 
-def main():
-    # parent_dir = os.path.dirname(os.path.dirname(__file__))
-    # twitter_fp = os.path.join(parent_dir, "tinyTwitter.json")
+# script_final.py <twitterfilename>
+def main(argv):
+    #Check input arguments
+    if len(argv) < 1:
+        print("Insufficient input arguments.\n"+\
+        "script.py <twitterfilename>")
+        sys.exit(2)
 
     #Init var
-    scoreList = []
-    textList = []
+    line_count = 1
     score_dict = {}
-
+    processList = []
+    scoreList = []
+    filename = argv[0]
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank() # get your process ID
     size = comm.Get_size()
 
     #Init classes
-    # afinn = AfinnReader(os.path.join(parent_dir, AFINNFILENAME))
     afinn = AfinnReader(AFINNFILENAME)
     grid = GridParser(MELBGRIDFILENAME)
 
-    # print(afinn.calcAFINNScore(["abanDoNs", "abandons.!?", "abandon abandon"]))
-    # print(grid.getCell(144.85,-37.64))
-
-    # #Start timer
-    # start = time.time()
     #The master is the only process that reads the file
     if rank == 0:
+        textList = []
         #Start looping through all the tweet entries
-        with open(TWITTERFILENAME,encoding="utf8") as json_file:
+        with open(filename,encoding="utf8") as json_file:
             data_list = json.load(json_file)
 
+        #Only store [tweet,(x-coord,y-coord)]
         for data in data_list['rows']:
             text = data["value"]["properties"]["text"]
             location = data["value"]["geometry"]["coordinates"]
             temp = [text,location]
             textList.append(temp)
 
+        #Splice the entire list into number of list == number of cores
         processList = numpy.array_split(textList, size)
 
     # Divide the data among processes
     dataList = comm.scatter(processList, root=0)
 
+    #Process the tweets
     for item in dataList:
         tweet = item[0]
         location = item[1]
@@ -63,24 +64,35 @@ def main():
         tweet_score = afinn.calcAFINNScore(tweet)
 
         #append results to scoreList
-        scoreList.append([tweet_grid, tweet_score])
+        scoreList.append({tweet_grid: tweet_score})
 
-    # Send the results back to the master processes
-    results = comm.gather(scoreList,root=0)
+    # Send the results back to the master process
+    results = comm.gather(scoreList, root=0)
 
-    #Aggregate the score to the appropriate dictionary with grid as the key
-    for tweet_grid, value in results:
-        if tweet_grid in score_dict.keys():
-            temp = score_dict[tweet_grid]
-            score_dict[tweet_grid] = [temp[0] + 1, temp[1] + tweet_score]
-        else:
-            score_dict[tweet_grid] = [1, tweet_score]
+    # Master process compiles all the results and print output
+    if comm.rank == 0:
+        master_dict = {}
 
-    #Stop the time elapsed
-    end = time.time()
+        #Compile processed data from all the cores
+        for dict_list in results:
+            for data in dict_list:
+                for i in data.keys():
+                    grid_key = i
+                    break
 
-    print("Time elapsed: "+ str((end-start)))
-    print_score(score_dict)
+                #Continuous dict updates
+                if grid_key in master_dict.keys():
+                    temp = master_dict[grid_key]
+                    master_dict[grid_key] = [temp[0] + 1, temp[1] + \
+                        data[grid_key]]
+                else:
+                    master_dict[grid_key] = []
+                    master_dict[grid_key] = [1, data[grid_key]]
+
+        print_score(master_dict)
+    else:
+        results = None
+
 
 #First formats the data then print out the data in an aligned table
 #Grid   #Total Tweets   $Overall Sentiment Score
@@ -99,6 +111,5 @@ def print_score(score_dict):
 
         print(grid.ljust(10)+format(val[0],",d").center(25)+score.center(25))
 
-
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
