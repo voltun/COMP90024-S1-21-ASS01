@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Give the job a name
-#SBATCH --job-name=twitt1n1c
+#SBATCH --job-name=twit1n1c
 
 # How many CPU to run on
 #SBATCH --nodes=1
@@ -20,13 +20,13 @@ module purge
 module load foss/2019b
 module load python/3.7.4
 
-echo "Running the script with 1 node 1 core"
+echo "Running the script with 1 node 1 core\n"
 
-echo "Running with tinyTwitter.json"
+echo "\nRunning with tinyTwitter.json"
 time srun -n 1 python3 script_final.py "tinyTwitter.json"
 
-echo "Running with smallTwitter.json"
+echo "\nRunning with smallTwitter.json"
 time srun -n 1 python3 script_final.py "smallTwitter.json"
 
-echo "Running with bigTwitter.json"
+echo "\nRunning with bigTwitter.json"
 time srun -n 1 python3 script_final.py "bigTwitter.json"
