@@ -20,13 +20,13 @@ module purge
 module load foss/2019b
 module load python/3.7.4
 
-echo "Running the script with 1 node 8 core\n"
+echo "Running the script with 1 node 8 core"
 
-echo "\nRunning with tinyTwitter.json"
+echo "Running with tinyTwitter.json"
 time srun -n 8 python3 script_final.py "tinyTwitter.json"
 
-echo "\nRunning with smallTwitter.json"
+echo "Running with smallTwitter.json"
 time srun -n 8 python3 script_final.py "smallTwitter.json"
 
-echo "\nRunning with bigTwitter.json"
+echo "Running with bigTwitter.json"
 time srun -n 8 python3 script_final.py "bigTwitter.json"
