@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Give the job a name
-#SBATCH --job-name=tinytest
+#SBATCH --job-name=big1n1c
 
 # How many CPU to run on
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 
 # Minimum acceptable walltime=hr:min:sec
-#SBATCH -t 10:00:00
+#SBATCH -t 1-12:00:00
 
 # Specify email to be notified of progress
 #SBATCH --mail-user=chungw4@student.unimelb.edu.au
@@ -21,4 +21,4 @@ module load openmpi/3.1.4
 module load python/3.7.4
 
 # Command to run the job!
-python3 main_1n1c.py
+python3 script.py "bigTwitter.json" 1 1

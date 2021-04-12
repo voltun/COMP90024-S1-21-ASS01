@@ -1,13 +1,14 @@
 #!/bin/bash
 
 # Give the job a name
-#SBATCH --job-name=tinytest
+#SBATCH --job-name=twitter1n8c
 
-# How many CPU to run on
-#SBATCH --ntasks=1
+# How many nodes and cores to run on
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
 
 # Minimum acceptable walltime=hr:min:sec
-#SBATCH -t 0:15:00
+#SBATCH -t 24:00:00
 
 # Specify email to be notified of progress
 #SBATCH --mail-user=chungw4@student.unimelb.edu.au
