@@ -8,20 +8,18 @@ from grid_parser import GridParser
 MELBGRIDFILENAME = "melbGrid.json"
 AFINNFILENAME = "AFINN.txt"
 
-# script.py <twitterfilename> <#node> <#core-per-node>
+# script.py <twitterfilename>
 def main(argv):
     #Check input arguments
-    if len(argv) < 3:
+    if len(argv) < 1:
         print("Insufficient input arguments.\n"+\
-        "script.py <twitterfilename> <#node> <#core-per-node>")
+        "script.py <twitterfilename>")
         sys.exit(2)
 
     #Init var
     line_count = 1
     score_dict = {}
     filename = argv[0]
-    node = argv[1]
-    core_per_node = argv[2]
 
     #Init classes
     afinn = AfinnReader(AFINNFILENAME)

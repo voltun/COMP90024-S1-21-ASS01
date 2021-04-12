@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Give the job a name
-#SBATCH --job-name=big1n1c
+#SBATCH --job-name=twitter1n1c
 
 # How many CPU to run on
 #SBATCH --nodes=1
@@ -16,9 +16,9 @@
 
 # Load environment variables for python
 module purge
-module load gcc/8.3.0
-module load openmpi/3.1.4
+
+module load foss/2019b
 module load python/3.7.4
 
 # Command to run the job!
-python3 script.py "bigTwitter.json" 1 1
+python3 script.py "bigTwitter.json"

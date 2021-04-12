@@ -16,8 +16,7 @@
 
 # Load environment variables for python
 module purge
-module load gcc/8.3.0
-module load openmpi/3.1.4
+module load foss/2019b
 module load python/3.7.4
 
 # Command to run the job!
