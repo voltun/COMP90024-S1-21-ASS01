@@ -77,7 +77,7 @@ def main(argv):
             #     location = json_line["value"]["geometry"]["coordinates"]
             #     temp = [text,location]
             #     textList.append(temp)
-        print("Total tweets: "+line_count)
+        print("Total tweets: "+str(line_count))
         #Find index lower and upper bounds
         step = line_count / size
         bounds = ["{},{}".format(round(step*i), round(step*(i+1))) \
@@ -86,11 +86,11 @@ def main(argv):
         #Format bounds into list of int lists
         for i in bounds:
             temp = i.split(',')
-            tempList = [int(temp[0]), int(temp[1])]
+            tempList = [int(temp[0]), int(temp[1]) - 1]
             bounds_list.append(tempList)
         #Splice the entire list into number of list == number of cores
         # processList = numpy.array_split(textList, size)
-
+        print(bounds_list)
     # Divide the data among processes
     # dataList = comm.scatter(processList, root=0)
     indexList = comm.scatter(bounds_list, root=0)
@@ -112,7 +112,7 @@ def main(argv):
                 continue
 
             #If reach upper bound of index, stop processing
-            if counter >= up_bound:
+            if counter > up_bound:
                 break
 
              #Iteratively parse a valid JSON, if any. checks the length of line
@@ -146,10 +146,12 @@ def main(argv):
                 continue
 
             #Calculate the AFINN score of the tweet
-            tweet_score = afinn.calcAFINNScore(tweet)
+            tweet_score = afinn.calcAFINNScore(text)
 
             #append results to scoreList
             scoreList.append({tweet_grid: tweet_score})
+
+            counter += 1
 
     #Process the tweets
     # for item in dataList:
