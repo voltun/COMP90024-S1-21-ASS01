@@ -79,7 +79,7 @@ def main(argv):
                 continue
 
             #If reach upper bound of index, stop processing
-            if counter > up_bound:
+            if counter >= up_bound:
                 break
 
              #Iteratively parse a valid JSON, if any. checks the length of line
