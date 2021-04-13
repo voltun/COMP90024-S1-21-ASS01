@@ -21,6 +21,7 @@ def main(argv):
     line_count = 0
     bounds_list = []
     counter = 0
+    partial_dict = {}
     score_dict = {}
     processList = []
     scoreList = []
@@ -117,8 +118,17 @@ def main(argv):
             #Calculate the AFINN score of the tweet
             tweet_score = afinn.calcAFINNScore(text)
 
-            #append results to scoreList
-            scoreList.append({tweet_grid: tweet_score})
+            #Continuous dict updates
+            if tweet_grid in partial_dict.keys():
+                temp = partial_dict[tweet_grid]
+                partial_dict[tweet_grid] = [temp[0] + 1, temp[1] + \
+                    tweet_score]
+            else:
+                partial_dict[tweet_grid] = []
+                partial_dict[tweet_grid] = [1, tweet_score]
+
+    #append results to scoreList
+    scoreList.append(partial_dict)
 
     # Send the results back to the master process
     results = comm.gather(scoreList, root=0)
@@ -127,21 +137,31 @@ def main(argv):
     if comm.rank == 0:
         master_dict = {}
 
-        #Compile processed data from all the cores
         for dict_list in results:
-            for data in dict_list:
-                for i in data.keys():
-                    grid_key = i
-                    break
-
-                #Continuous dict updates
-                if grid_key in master_dict.keys():
-                    temp = master_dict[grid_key]
-                    master_dict[grid_key] = [temp[0] + 1, temp[1] + \
-                        data[grid_key]]
+            for grid in dict_list[0].keys():
+                if grid in master_dict.keys():
+                    mast_temp = master_dict[grid]
+                    temp = dict_list[0][grid]
+                    master_dict[grid] = [mast_temp[0]+temp[0], \
+                        mast_temp[1]+temp[1]]
                 else:
-                    master_dict[grid_key] = []
-                    master_dict[grid_key] = [1, data[grid_key]]
+                    temp = dict_list[0][grid]
+                    master_dict[grid] = temp
+        # #Compile processed data from all the cores
+        # for dict_list in results:
+        #     for data in dict_list:
+        #         for i in data.keys():
+        #             grid_key = i
+        #             break
+        #
+        #         #Continuous dict updates
+        #         if grid_key in master_dict.keys():
+        #             temp = master_dict[grid_key]
+        #             master_dict[grid_key] = [temp[0] + 1, temp[1] + \
+        #                 data[grid_key]]
+        #         else:
+        #             master_dict[grid_key] = []
+        #             master_dict[grid_key] = [1, data[grid_key]]
 
         print_score(master_dict)
     else:
